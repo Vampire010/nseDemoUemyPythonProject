@@ -25,15 +25,26 @@
     <Compile Include="browserCommands.py" />
     <Compile Include="browserInteraction.py" />
     <Compile Include="browserLaunch.py" />
+    <Compile Include="doubleClick.py" />
     <Compile Include="DragAndDropExample.py" />
     <Compile Include="ExplicitWaitExample.py" />
     <Compile Include="HandlingDropdowns.py" />
+    <Compile Include="iFramesDemo.py" />
     <Compile Include="ImplicitWaitExample.py" />
     <Compile Include="MouseHover.py" />
+    <Compile Include="PYtestDemo\test_Nse.py" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="dragDrop.html" />
-    <Content Include="mouseHover.html" />
+    <Content Include="HandlingTableData.py" />
+    <Content Include="htmlCode\doubleClick.html" />
+    <Content Include="htmlCode\dragDrop.html" />
+    <Content Include="htmlCode\iframecode.html" />
+    <Content Include="htmlCode\mouseHover.html" />
+    <Content Include="htmlCode\StockDetailsTable.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="htmlCode\" />
+    <Folder Include="PYtestDemo\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
