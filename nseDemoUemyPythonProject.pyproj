@@ -4,7 +4,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>aeb4e3b6-24cd-4f6c-9ba5-5350714f6e02</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>browserLaunch.py</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -21,29 +22,22 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="AlertPromptConfirm.py" />
-    <Compile Include="browserCommands.py" />
-    <Compile Include="browserInteraction.py" />
-    <Compile Include="browserLaunch.py" />
-    <Compile Include="doubleClick.py" />
-    <Compile Include="DragAndDropExample.py" />
-    <Compile Include="ExplicitWaitExample.py" />
-    <Compile Include="HandlingDropdowns.py" />
-    <Compile Include="iFramesDemo.py" />
-    <Compile Include="ImplicitWaitExample.py" />
-    <Compile Include="MouseHover.py" />
     <Compile Include="PYtestDemo\test_Nse.py" />
+    <Compile Include="Udemy\DownloadResourceFiles.py" />
+    <Compile Include="Udemy\GetCourseContentDetails.py" />
+    <Compile Include="Udemy\GetCourseList.py" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="HandlingTableData.py" />
     <Content Include="htmlCode\doubleClick.html" />
     <Content Include="htmlCode\dragDrop.html" />
     <Content Include="htmlCode\iframecode.html" />
     <Content Include="htmlCode\mouseHover.html" />
     <Content Include="htmlCode\StockDetailsTable.html" />
+    <Content Include="htmlCode\verifycheckbox.html" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="htmlCode\" />
+    <Folder Include="Udemy\" />
     <Folder Include="PYtestDemo\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
