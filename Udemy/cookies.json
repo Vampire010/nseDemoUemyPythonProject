@@ -1,0 +1,62 @@
+[
+  {
+    "name": "__cf_bm",
+    "value": "aOw4dwZ8As8dYtKNpz4Jd2Ya4TzL6K2PkYt7GqHioks-1754209004-1.0.1.1-Bq7X689Qry7S2knzsQAvZECujv7ZlsvAMHIQE0elSt8Dv3ueZ1zeDGct0_rolbXARJeOeJ3ubzBRuC3LgPMymvUsrWe5L1BQ34n8XQxcpGk",
+    "domain": ".udemy.com",
+    "path": "/",
+    "secure": true,
+    "httpOnly": false
+  },
+  {
+    "name": "__cfruid",
+    "value": "16e8faabe560a6f0d188f7b897424b3ecef086ae-1754196669",
+    "domain": ".udemy.com",
+    "path": "/",
+    "secure": true,
+    "httpOnly": true
+  },
+  {
+    "name": "__ssid",
+    "value": "b24c7c3da92ed930fa77628d64fe19d",
+    "domain": ".udemy.com",
+    "path": "/"
+  },
+  {
+    "name": "__stripe_mid",
+    "value": "6bd73601-ee42-4906-933b-3e750aa283d9f815ca",
+    "domain": ".www.udemy.com",
+    "path": "/",
+    "secure": true
+  },
+  {
+    "name": "__udmy_2_v57r",
+    "value": "12e9c6571e9e4d3099e354ddc39ca941",
+    "domain": ".udemy.com",
+    "path": "/",
+    "secure": true
+  },
+  {
+    "name": "_cfuvid",
+    "value": "Qzd0jlvqA79RpkIqp7iio0N8DCPi7q55JBR8azDb56E-1754196669503-0.0.1.1-604800000",
+    "domain": ".udemy.com",
+    "path": "/",
+    "secure": true,
+    "httpOnly": true
+  },
+  {
+    "name": "access_token",
+    "value": "qRD3K7gMIf+phY7p+ZWfqlNkVKSYv4en9+SGNu+S04Y:g+C7av1pzqNxwxmJPEPQMGH9ebqHRxNR6QG8nSy8xHw",
+    "domain": "www.udemy.com",
+    "path": "/",
+    "secure": true,
+    "httpOnly": true
+  },
+  {
+    "name": "cf_clearance",
+    "value": "A.2lK570ycTiTqEjSbamPw8KeCvJwZw6tniLlJzOkD8-1754203706-1.2.1.1-RTq7WRyr6X2Tx2dGeLCv_Zvt68dg2Ymn4gi_S9DQV0pdns0agCz5gRQGObe4Ydrs9nFuKDC_uQq5nPv4Tw.W4j4kadwK8mUZR.UKf4w1S1bKkgnzvbRd06SGZhsseY86wfHvJ1gT8WjX.vUH43qVMZ2bt3mGuSBqFhRBDF_MoQBbiRLQqwGpPDnXBfj1KDL38tdgwKE56KLYhDlvV8ZzeRLLiHq7s1QttvUZ9doWYf0",
+    "domain": ".udemy.com",
+    "path": "/",
+    "secure": true,
+    "httpOnly": true
+  }
+]
