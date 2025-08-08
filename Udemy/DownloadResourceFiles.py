@@ -1,71 +1,35 @@
-﻿import os
-import re
-import requests
+﻿import requests
 
-def sanitize(name):
-    return re.sub(r'[\\/*?:"<>|]', "", name)
-
-ACCESS_TOKEN = 'qRD3K7gMIf+phY7p+ZWfqlNkVKSYv4en9+SGNu+S04Y:g+C7av1pzqNxwxmJPEPQMGH9ebqHRxNR6QG8nSy8xHw'
-COURSE_ID = 397068  # Replace with your actual course ID
-
-
-
-headers = {
-    "Authorization": f"Bearer {ACCESS_TOKEN}",
-    "Accept": "application/json, text/plain, */*"
+# Load cookies from file (you can also copy paste your Cookie header manually here if needed)
+cookies = {
+    "access_token": "qRD3K7gMIf+phY7p+ZWfqlNkVKSYv4en9+SGNu+S04Y:g+C7av1pzqNxwxmJPEPQMGH9ebqHRxNR6QG8nSy8xHw",
+    "client_id": "bd2565cb7b0c313f5e9bae44961e8db2",
+    "csrf": "cJ0qnLjwfnaYxnxuntf7AbwC86JQGxy0"
+    # Add cf_clearance, __cf_bm if needed
 }
 
-# Sanitize folder and file names for Windows
-def clean(name):
-    return re.sub(r'[<>:"/\\|?*]', '', name)
+headers = {
+    'Accept': 'application/json, text/plain, */*',
+    'X-Requested-With': 'XMLHttpRequest',
+    'Cookie': '; '.join([f"{key}={value}" for key, value in cookies.items()])
+}
 
-# Udemy curriculum API
-url = f"https://www.udemy.com/api-2.0/courses/{COURSE_ID}/subscriber-curriculum-items/?page_size=1000"
+url = "https://www.udemy.com/api-2.0/courses/397068/subscriber-curriculum-items/?curriculum_types=chapter,lecture,practice,quiz,role-play&page_size=200&fields[lecture]=title,object_index,is_published,sort_order,created,asset,supplementary_assets,is_free&fields[quiz]=title,object_index,is_published,sort_order,type&fields[practice]=title,object_index,is_published,sort_order&fields[chapter]=title,object_index,is_published,sort_order&fields[asset]=title,filename,asset_type,status,time_estimation,is_external&caching_intent=True"
+
 response = requests.get(url, headers=headers)
+data = response.json()
 
-if response.status_code != 200:
-    print("❌ Failed to get curriculum:", response.status_code, response.text)
-    exit()
+section_count = 0
+lecture_count = 0
 
-data = response.json().get("results", [])
-
-current_section = ""
-section_index = 0
-lecture_index = 0
-
-for item in data:
-    if item["_class"] == "chapter":
-        section_index += 1
-        lecture_index = 0
-        current_section = f"Section {section_index:02d} - {clean(item['title'])}"
-        os.makedirs(current_section, exist_ok=True)
-
-    elif item["_class"] == "lecture":
-        lecture_index += 1
-        lecture_title = clean(item["title"])
-        lecture_number = f"{lecture_index:02d}"
-
-        # Check for supplementary assets (resources)
-        asset_info = item.get("asset", {})
-        resources = asset_info.get("supplementary_assets", [])
-
-        for res in resources:
-            file_name = clean(res["filename"])
-            download_url = res.get("download_url")
-            full_file_name = f"{lecture_number} - {lecture_title} - {file_name}"
-            path = os.path.join(current_section, full_file_name)
-
-            # Skip if already downloaded
-            if os.path.exists(path):
-                print(f"✅ Already exists: {path}")
-                continue
-
-            # Download and save
-            print(f"⬇️ Downloading: {full_file_name}")
-            try:
-                r = requests.get(download_url, headers=headers)
-                with open(path, "wb") as f:
-                    f.write(r.content)
-                print(f"✅ Saved to: {path}")
-            except Exception as e:
-                print(f"❌ Error downloading {file_name}: {e}")
+for item in data['results']:
+    if item['_class'] == 'chapter':
+        section_count += 1
+        lecture_count = 0
+        print(f"\nSection {section_count:02d} - {item['title']}")
+    elif item['_class'] == 'lecture':
+        lecture_count += 1
+        print(f"  {lecture_count:02d} - {item['title']}")
+        if item.get('supplementary_assets'):
+            for asset in item['supplementary_assets']:
+                print(f"    - Resource: {asset.get('title', 'Untitled Resource')}")
