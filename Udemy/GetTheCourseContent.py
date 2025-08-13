@@ -1,7 +1,7 @@
 ﻿import requests
 from openpyxl import load_workbook, Workbook
 from docx import Document
-
+import json
 # Input Excel file
 excel_file = "udemy_courses.xlsx"
 wb = load_workbook(excel_file)
@@ -18,10 +18,18 @@ out_ws.title = "Lecture Details"
 out_ws.append(["Course ID", "Course Name", "Lecture ID", "Lecture Title", "Object Index"])
 
 # Cookies and headers setup
+
+# === Load access token from Authentication.json ===
+with open("Authentication.json", "r") as f:
+    auth_data = json.load(f)
+ACCESS_TOKEN = auth_data.get("access_token")
+CLIENT_ID = auth_data.get("client_id")
+CSRF = auth_data.get("csrf")
+
 cookies = {
-    "access_token": "qRD3K7gMIf+phY7p+ZWfqlNkVKSYv4en9+SGNu+S04Y:g+C7av1pzqNxwxmJPEPQMGH9ebqHRxNR6QG8nSy8xHw",
-    "client_id": "bd2565cb7b0c313f5e9bae44961e8db2",
-    "csrf": "cJ0qnLjwfnaYxnxuntf7AbwC86JQGxy0"
+    "access_token": ACCESS_TOKEN,
+    "client_id": CLIENT_ID,
+    "csrf": CSRF
 }
 
 headers = {

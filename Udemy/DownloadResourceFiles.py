@@ -1,96 +1,67 @@
 ﻿import requests
-from openpyxl import load_workbook, Workbook
-from docx import Document
+import json
 
-# Load input Excel file
-input_excel_file = "udemy_lecture_details.xlsx"
-wb = load_workbook(input_excel_file)
-ws = wb.active
-
-# Word document setup
-document = Document()
-document.add_heading("Udemy Course Curriculums", level=1)
-
-# Excel output setup
-output_wb = Workbook()
-output_ws = output_wb.active
-output_ws.title = "Lecture Info"
-output_ws.append(["Course ID", "Course Name", "Lecture ID", "Lecture Title", "Object Index", "Time (min)"])
-
-# Headers and Cookies
-cookies = {
-    "access_token": "qRD3K7gMIf+phY7p+ZWfqlNkVKSYv4en9+SGNu+S04Y:g+C7av1pzqNxwxmJPEPQMGH9ebqHRxNR6QG8nSy8xHw",
-    "client_id": "bd2565cb7b0c313f5e9bae44961e8db2",
-    "csrf": "cJ0qnLjwfnaYxnxuntf7AbwC86JQGxy0"
-}
+url = "https://www.udemy.com/api-2.0/ecl?client_key=js&client_version=0e6e05e"
 
 headers = {
-    'Accept': 'application/json, text/plain, */*',
-    'X-Requested-With': 'XMLHttpRequest',
-    'Cookie': '; '.join([f"{key}={value}" for key, value in cookies.items()])
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "en-GB,en-IN;q=0.9,en-US;q=0.8,en;q=0.7",
+    "content-type": "text/plain",
+    "dwn-profiling": "Cg1Bc2lhL0NhbGN1dHRhEMoCGMoCIgtHb29nbGUgSW5jLigIOMAMQIQHSgVXaW4zMlIGeDg2XzY0WgVlbi1HQmIFZW4tR0JiBWVuLUlOYgVlbi1VU2ICZW5qBmNocm9tZXABehBSEP/mGSYBCrcxZCAe/eJSggEQ4M1cXagHG8mKUxX+RjFHCogBGJgBAaABAKgBALABALgBDMABAMgBANABANgBAOABAfgBAYACAYgCAJACEpoCEFVPNApns9U0kH9cZRfnTfClAgBQFUOtAgBQFUO1AgBQFUO9AgAEEEPFAgAI80LNAgCAFUHVAgDcE0PaAhDAXiArdH9UcFAzqZFC/Y5s4AIA6AL88/////////8B8AIy+AKEDIADAZIDEKFZ2bTrmWp7mrF87BjeqB6YAwWiAxDBQrN5ygGO9Za6Ttivx59LqgNRQU5HTEUgKEFNRCwgQU1EIFJhZGVvbihUTSkgR3JhcGhpY3MgKDB4MDAwMDE2NEMpIERpcmVjdDNEMTEgdnNfNV8wIHBzXzVfMCwgRDNEMTEpsgMRR29vZ2xlIEluYy4gKEFNRCnAAwHIA8/p2uaJM9ADiqvt5okz2AOHjojAiDPiA3xNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUV4cXJ3RlVpNDZKOVIxNTN0VG5sQnBrVWVVR3dEc0crVmNWT01RQlpWdEptMldZTkFnVTBtN3pJdlNzbldMTDVyb1FaV1JvcVB3RlFzazhmNGRGd05EUT096gNgTUVVQ0lIRjlmL0pUWCtHWGR4MERMQzZHYy9oZXlGM2toUStxbEw1MXFWN1FtRVo3QWlFQXhOS2ljWFF1cjA5SVZETkNOZ3hYZGNLQmRFS0toY1dtTGttVUgyVkJlc0U9igQgOGE1NzkwMTY1MzE3NGQyZjliNTgxOTAwZDAwMjk5MDiaBLwCCBoQmN0QGCkgBEIgCAEVAABAQB1aa69EJQV/lkMt1kMRQzUXzB1DPbqCvENCIAgCFb0bD0AdLXZQRCVW+1xDLcra5EI1a1f3Qj2CGHhDQiAIAxUAADBBHQCglkQlAAB/Qy0AAMRCNQAA+UI9WSiLQ0IgCAQV89gKPR1ddCFBJckMsD8tW3srPzXDUYE/PYyd3T9CIAgFFQAAAAAd128FPyWvUdY9LSvzxDw1K/PEPD3XmBU+QiAIBhUAAAAAHQAAgD8lDM7HPC0AAAAANQAAAAA9qvUdPkIgCAcVAAAAAB0AAMBCJc+FqEAtAACAPzUAAIBAPfHN0EBCIAgIFQAAsEEdAAAAQiUAANhBLQAAIEE1AAAAQj0AAKBAQiAICRUAALhCHQAAC0MlAAD7Qi0AAABANQCAB0M9ZS2bQaoEBAgCEALCBCA2OTAyZGM2NDM2ZDU0N2Y3YmU4NDMxOGJmMGMzYzliOMoEB2luZGV4RELSBAVFQ0RTQdoEDlNFQ1VSRV9JRF9TRU5U4gQHV2luZG93c+oEAjEx8gQGQ2hyb21l+gQDMTM4igUgZGYyZTgyM2YxMWJhNDMwNDk0N2RlZDZjMDc1NDAwNzSSBR4VAADwQR0AAHRCJQAAaEItAAAAADUAAHBCPUDA70CaBQx2MS41LjIxLTE4MDWqBSAQsJWXjQEY8L21QCDhqNvmiTMoiavt5okzMPy83OaJM8IFBAECLgPKBQEB0AUC2AXP6drmiTPgBYqr7eaJM4oGDTIwMi42Mi45My4xNjmaBhoIh3IQzLmZj9MDGO/1u1Eg6+6rRyiAgPD/D6gGAA==",
+    "origin": "https://www.udemy.com",
+    "priority": "u=1, i",
+    "referer": "https://www.udemy.com/course/learn-selenium-automation-in-easy-python-language/learn/lecture/2505942",
+    "sec-ch-ua": '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
 }
 
-# Iterate over input Excel rows (starting from row 2)
-for row in range(2, ws.max_row + 1):
-    course_id = ws[f"A{row}"].value
-    course_name = ws[f"C{row}"].value or ""
-    if not course_id:
-        continue
+cookies = {
+    "__udmy_2_v57r": "b8723d948ca74f7a8deedd62a352f378",
+    "ud_firstvisit": "2025-08-08T04:47:58.440390+00:00:1ukF1K:wA-fLyw8v12kZ_bY2cwzsoFEyapbTmmvi-0cIqigGEk",
+    # ... add rest of cookies here in the same key-value style ...
+}
 
-    print(f"📘 Fetching Course ID: {course_id} - {course_name}")
-    document.add_page_break()
-    document.add_heading(f"{course_name} ({course_id})", level=2)
+payload = [
+    {
+        "eventType": "CourseTakingContentDownloadEvent",
+        "eventData": {
+            "createTime": 1754978274805,
+            "sendTime": 1754978276743,
+            "eventId": "NGY4NTMwN2YtYWVjYS00YW",
+            "_type": "CourseTakingContentDownloadEvent",
+            "clientHeader": {
+                "appKey": "web_main",
+                "sourceServiceName": "website-django",
+                "organizationId": None,
+                "userId": 256172910,
+                "visitorUuid": "b8723d948ca74f7a8deedd62a352f378",
+                "sessionId": "ZWViZjk3ZTAtYzgxYy00Ym",
+                "clientId": "YTA1YjUyODAtMTMwNy00Nj",
+                "page": {
+                    "trackingId": "MDU5MjI1OTUtNTJmOC00ZT",
+                    "key": "course_taking_curriculum_item"
+                },
+                "isMobile": False,
+                "isD2CSubscriber": False
+            },
+            "courseTakingHeader": {
+                "courseId": 397068,
+                "userMode": "student"
+            },
+            "resourceType": "file_download",
+            "curriculum": {
+                "curriculumType": "lecture",
+                "curriculumId": 2505942,
+                "practiceSubType": None
+            }
+        }
+    }
+]
 
-    url = f"https://www.udemy.com/api-2.0/courses/{course_id}/subscriber-curriculum-items/?" \
-          "curriculum_types=chapter,lecture,practice,quiz,role-play&page_size=200" \
-          "&fields[lecture]=id,title,object_index,is_published,sort_order,created,asset,supplementary_assets,is_free" \
-          "&fields[quiz]=title,object_index,is_published,sort_order,type" \
-          "&fields[practice]=title,object_index,is_published,sort_order" \
-          "&fields[chapter]=title,object_index,is_published,sort_order" \
-          "&fields[asset]=title,filename,asset_type,status,time_estimation,is_external"
-
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        print(f"❌ Failed to fetch course. Status: {response.status_code}")
-        document.add_paragraph(f"❌ Failed to fetch course. Status: {response.status_code}")
-        continue
-
-    data = response.json()
-    section_count = 0
-    lecture_count = 0  # Continuous across entire course
-
-    for item in data.get('results', []):
-        if item['_class'] == 'chapter':
-            section_count += 1
-            section_title = f"Section {section_count:02d} - {item.get('title', 'Untitled')}"
-            document.add_heading(section_title, level=3)
-
-        elif item['_class'] == 'lecture':
-            lecture_count += 1
-            lecture_id = item.get("id")
-            lecture_title = item.get("title", "Untitled")
-            object_index = item.get("object_index", "N/A")
-
-            # Time in minutes
-            seconds = item.get('asset', {}).get('time_estimation')
-            time_minutes = round(seconds / 60) if isinstance(seconds, (int, float)) else "N/A"
-
-            # Word output
-            lecture_line = f"{lecture_count:02d} - {lecture_title} (Index: {object_index}, Time: {time_minutes} min)"
-            document.add_paragraph(lecture_line, style='List Bullet')
-
-            # Excel output
-            output_ws.append([course_id, course_name, lecture_id, lecture_title, object_index, time_minutes])
-
-            # Resources
-            if item.get('supplementary_assets'):
-                for asset in item['supplementary_assets']:
-                    resource_title = asset.get('title', 'Untitled Resource')
-                    document.add_paragraph(f"Resource: {resource_title}", style='List Bullet 2')
-
-# Save files
-document.save("all_udemy_courses_curriculum.docx")
-output_wb.save("all_lecture_data.xlsx")
-
-print("✅ Word saved: all_udemy_courses_curriculum.docx")
-print("✅ Excel saved: all_lecture_data.xlsx")
+response = requests.post(url, headers=headers, cookies=cookies, json=payload)
+print(response.status_code, response.text)

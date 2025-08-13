@@ -1,6 +1,13 @@
 ﻿import requests
+import json
+from openpyxl import Workbook
 
-ACCESS_TOKEN = 'qRD3K7gMIf+phY7p+ZWfqlNkVKSYv4en9+SGNu+S04Y:g+C7av1pzqNxwxmJPEPQMGH9ebqHRxNR6QG8nSy8xHw'
+
+# === Load access token from Authentication.json ===
+with open("Authentication.json", "r") as f:
+    auth_data = json.load(f)
+ACCESS_TOKEN = auth_data.get("access_token")
+
 COURSE_ID = 397068  # Replace with actual course ID
 
 headers = {
