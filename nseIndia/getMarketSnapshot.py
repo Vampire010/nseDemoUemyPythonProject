@@ -1,65 +1,88 @@
 ﻿import requests
 import pandas as pd
-import json
-from openpyxl import Workbook
+import os
+from getCookiesFromNSEIndia import NSECookieManager
 
 
-# === Load access token from Authentication.json ===
-with open("nseIndiaCookies.json", "r") as f:
-    auth_data = json.load(f)
-COOKIE_STRING = auth_data.get("Cookie")
+class NSEMarketSnapshotFetcher:
+    def __init__(self):
+        """Initialize with cookies from NSECookieManager and set output path."""
+        self.export_dir = r"C:\Users\giris\source\repos\nseDemoUemyPythonProject\nseIndia\exportedData"
+        os.makedirs(self.export_dir, exist_ok=True)  # Create folder if it doesn't exist
+        self.output_file = os.path.join(self.export_dir, "MarketSnapshotTopGainers.xlsx")
 
-URL = "https://www.nseindia.com/api/NextApi/apiClient?functionName=getMarketSnapshot&&type=G"
+        self.headers = {}
+        try:
+            cm = NSECookieManager()
+            cookies = cm.fetch_and_save_cookies()
 
-HEADERS = {
-    'accept': '*/*',
-    'accept-language': 'en-GB,en-IN;q=0.9,en-US;q=0.8,en;q=0.7',
-    'priority': 'u=1, i',
-    'referer': 'https://www.nseindia.com/',
-    'sec-ch-ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'sec-fetch-dest': 'empty',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'same-origin',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-    'cookie': COOKIE_STRING
-}
+            # Build cookie string
+            cookie_str = "; ".join([f"{k}={v}" for k, v in cookies.items()])
+            self.headers = {
+                'accept': '*/*',
+                'accept-language': 'en-GB,en-IN;q=0.9,en-US;q=0.8,en;q=0.7',
+                'priority': 'u=1, i',
+                'referer': 'https://www.nseindia.com/',
+                'sec-ch-ua': '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-origin',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+                'cookie': cookie_str
+            }
+            print("✅ Cookies initialized successfully.")
 
-def fetch_market_snapshot():
-    try:
-        response = requests.get(URL, headers=HEADERS, timeout=10)
-        response.raise_for_status()
-        data = response.json()
+        except Exception as e:
+            print(f"❌ [ERROR] Failed to initialize cookies: {e}")
 
-        top_gainers = data.get("data", {}).get("topGainers", [])
+        self.url = "https://www.nseindia.com/api/NextApi/apiClient?functionName=getMarketSnapshot&&type=G"
 
-        if not top_gainers:
-            print("⚠ No data found for top gainers.")
+    def fetch_market_snapshot(self):
+        """Fetch and save top gainers from NSE market snapshot."""
+        try:
+            response = requests.get(self.url, headers=self.headers, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"❌ [Request Error] Failed to fetch data: {e}")
+            return
+        except ValueError:
+            print("❌ [JSON Error] Failed to parse JSON response.")
+            return
+        except Exception as e:
+            print(f"❌ [Unexpected Error] {e}")
             return
 
-        # Select only useful columns
-        df = pd.DataFrame(top_gainers, columns=[
-            "symbol", "series", "openPrice", "highPrice", "lowPrice", "lastPrice",
-            "previousClose", "change", "pchange", "totalTradedVolume"
-        ])
+        try:
+            top_gainers = data.get("data", {}).get("topGainers", [])
+            if not top_gainers:
+                print("⚠ No data found for top gainers.")
+                return
 
-        # Format numbers
-        df["openPrice"] = df["openPrice"].round(2)
-        df["highPrice"] = df["highPrice"].round(2)
-        df["lowPrice"] = df["lowPrice"].round(2)
-        df["lastPrice"] = df["lastPrice"].round(2)
-        df["previousClose"] = df["previousClose"].round(2)
-        df["change"] = df["change"].round(2)
-        df["pchange"] = df["pchange"].round(2)
+            # Select and format columns
+            df = pd.DataFrame(top_gainers, columns=[
+                "symbol", "series", "openPrice", "highPrice", "lowPrice", "lastPrice",
+                "previousClose", "change", "pchange", "totalTradedVolume"
+            ])
+            for col in ["openPrice", "highPrice", "lowPrice", "lastPrice", "previousClose", "change", "pchange"]:
+                df[col] = df[col].round(2)
 
-        print("\n📊 Top Gainers Table\n")
-        print(df.to_string(index=False))
+            # Save to Excel
+            try:
+                df.to_excel(self.output_file, index=False)
+                print(f"✅ Top Gainers saved to {self.output_file}")
+            except Exception as e:
+                print(f"❌ [File Save Error] Could not save Excel file: {e}")
 
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Request failed: {e}")
-    except ValueError:
-        print("❌ Failed to parse JSON response.")
+        except Exception as e:
+            print(f"❌ [Processing Error] {e}")
+
 
 if __name__ == "__main__":
-    fetch_market_snapshot()
+    try:
+        fetcher = NSEMarketSnapshotFetcher()
+        fetcher.fetch_market_snapshot()
+    except Exception as e:
+        print(f"❌ [Fatal Error] Script failed: {e}")
